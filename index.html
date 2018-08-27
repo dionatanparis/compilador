@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+
+    <title>FileAPI HTML5</title>
+    <style type="text/css">
+        #filecontents {
+            border: double;
+            overflow-y: scroll;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+Por favor selecione arquivo que será lido:
+<input type="file" id="txtfiletoread" /><br />
+<div>Conteúdo do arquivo:</div>
+<div id="filecontents">
+</div>
+
+<script>
+
+    window.onload = function () {
+        //Check the support for the File API support
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            var fileSelected = document.getElementById('txtfiletoread');
+            fileSelected.addEventListener('change', function (e) {
+                //Set the extension for the file
+                var fileExtension = /text.*/;
+                //Get the file object
+                var fileTobeRead = fileSelected.files[0];
+                //Check of the extension match
+                if (fileTobeRead.type.match(fileExtension)) {
+                    //Initialize the FileReader object to read the 2file
+                    var fileReader = new FileReader();
+                    fileReader.onload = function (e) {
+                        var lines = this.result.split('\n');
+                        verify(lines);
+
+
+                        var fileContents = document.getElementById('filecontents');
+                        fileContents.innerText = fileReader.result;
+                    }
+                    fileReader.readAsText(fileTobeRead);
+
+                }
+                else {
+                    alert("Por favor selecione arquivo texto");
+                }
+
+            }, false);
+        }
+        else {
+            alert("Arquivo(s) não suportado(s)");
+        }
+    };
+
+    verify = function(lines) {
+        var  tokens = [];
+        var  simbols = [];
+        var  operators = [];
+        var  ignorados = [];
+        var  vars = [];
+        var  values = []
+
+
+        for( var i =0; i< lines.length; i++) {
+
+            var words = lines[i].split(' ');
+            console.log('words =', words);
+            for (var j = 0; j < words.length; j++) {
+                if(notComent(words[j])) {
+                    if (isToken(words[j]) != undefined) {
+                        tokens.push(words[j]);
+                        continue;
+                    } else if (isSimbol(words[j])) {
+                        simbols.push(words[j]);
+                        continue;
+                    }
+                    else if (isVar(words[j])) {
+                        vars.push(words[j]);
+                        continue;
+                    }
+                    else if(isOperator(words[j])){
+                        operators.push(words[j]);
+                        continue;
+                    }else if(isValues(words[j])){
+                        values.push(words[j]);
+                        continue;
+                    }
+                    else {
+                        ignorados.push(words[j]);
+                    }
+                }else{
+                    break;
+                }
+
+            }
+        }
+        console.log('tokens',tokens);
+        console.log('simbols',simbols);
+        console.log('operators',operators);
+        console.log('ignorados',ignorados);
+        console.log('vars',vars);
+        console.log('vals',values);
+
+
+    }
+
+    isValues = function (word) {
+        var exp = /[0-9]/;
+        return word.match(exp);
+
+    }
+
+    isToken = function(word){
+        var tokens = '(text|asm|break|case|char|const|continue|default|do|double|else|' +
+            'enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|' +
+            'union|unsigned|void|volatile|while)';
+        console.log(word);
+       return word.match(tokens);
+
+    }
+
+    isSimbol = function (word) {
+        var  simbols = /([\.|\,|\;|\(|\)])/;
+        return word.match(simbols);
+    }
+
+    isOperator = function (word) {
+        var operator = /(\+|\=|\-|\*|\=\=|\!\=|\+\+|\-\-)+/g;
+        return word.match(operator);
+    }
+
+    isVar = function (word) {
+        console.log(word);
+        var v= /([ˆa-z])/g;
+        return word.match(v);
+    };
+
+    notComent = function (word) {
+        if(word.includes('//')){
+            return false;
+        }
+        return true;
+    }
+
+
+</script>
+</body>
+</html>
